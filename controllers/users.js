@@ -6,6 +6,7 @@ const ErrorBadRequest = require('../utils/errors/ErrorBadRequest');
 const ErrorNotFound = require('../utils/errors/ErrorNotFound');
 const ErrorConflict = require('../utils/errors/ErrorConflict');
 const ErrorUnauthorized = require('../utils/errors/ErrorUnauthorized');
+const { NODE_ENV, JWT_SECRET } = require('../utils/constants');
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
@@ -20,9 +21,13 @@ const login = (req, res, next) => {
         if (!matched) {
           throw new ErrorUnauthorized('Неправильные email или пароль');
         }
-        const token = jwt.sign({ _id: user._id }, 'secret-key', {
-          expiresIn: '7d',
-        }); // создадим токен
+        const token = jwt.sign(
+          { _id: user._id },
+          NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+          {
+            expiresIn: '7d',
+          },
+        ); // создадим токен
         return res.status(200).send({ token }); // вернём токен
       });
     })
@@ -31,7 +36,8 @@ const login = (req, res, next) => {
 
 // ВОЗВРАЩАЕТ ИНФОРМАЦИЮ О ТЕКУЩЕМ ПОЛЬЗОВАТЕЛЕ
 const getInfoUser = (req, res, next) => {
-  User.findById(req.user._id)
+  const { _id } = req.user;
+  User.findById(_id)
     .then((user) => {
       if (!user) {
         throw new ErrorNotFound('Запрашиваемый пользователь не найден');
@@ -109,9 +115,17 @@ const updateProfile = (req, res, next) => {
     });
 };
 
+// ВОЗВРАЩАЕТ ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
+const getUsers = (req, res, next) => {
+  User.find({})
+    .then((users) => res.send(users))
+    .catch((err) => next(err));
+};
+
 module.exports = {
   login,
   getInfoUser,
   createUser,
   updateProfile,
+  getUsers,
 };
