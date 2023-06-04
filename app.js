@@ -8,6 +8,7 @@ const router = require('./routes');
 const handlerError = require('./middlewares/handlerError');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { PORT, urlDB } = require('./utils/constants');
+const limiter = require('./middlewares/expressRateLimit');
 
 const app = express();
 
@@ -18,6 +19,8 @@ app.use(bodyParser.json()); // для собирания JSON-формата
 app.use(bodyParser.urlencoded({ extended: true })); // для приёма веб-страниц внутри POST-запроса
 
 app.use(requestLogger);
+
+app.use(limiter);
 
 app.use(router);
 
