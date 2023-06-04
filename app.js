@@ -2,17 +2,18 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
-const router = require('./routes');
+const helmet = require('helmet');
 
+const router = require('./routes');
 const handlerError = require('./middlewares/handlerError');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-
 const { PORT, urlDB } = require('./utils/constants');
 
 const app = express();
 
 mongoose.connect(urlDB);
 
+app.use(helmet());
 app.use(bodyParser.json()); // для собирания JSON-формата
 app.use(bodyParser.urlencoded({ extended: true })); // для приёма веб-страниц внутри POST-запроса
 
