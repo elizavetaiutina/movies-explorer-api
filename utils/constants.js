@@ -17,7 +17,7 @@ const allowedCors = [
 
 require('dotenv').config();
 
-const { PORT = 3001, NODE_ENV, JWT_SECRET } = process.env;
+const { PORT = 3000, NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports = {
   regExp,
