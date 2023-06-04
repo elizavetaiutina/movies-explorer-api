@@ -2,6 +2,9 @@ const Movie = require('../models/movie');
 const ErrorBadRequest = require('../utils/errors/ErrorBadRequest');
 const ErrorNotFound = require('../utils/errors/ErrorNotFound');
 const ErrorForbidden = require('../utils/errors/ErrorForbidden');
+const {
+  textErrorId, textBadRequest, textForbidden, textNotFoundId,
+} = require('../utils/errors/textErrors');
 
 // ВОЗВРАЩАЕТ ВСЕ СОХРАНЁННЫЕ ТЕКУЩИМ ПОЛЬЗОВАТЕЛЕМ ФИЛЬМЫ
 const getSavedMovies = (req, res, next) => {
@@ -46,7 +49,7 @@ const createMovie = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ErrorBadRequest('Некорректно заполнены поля ввода'));
+        next(new ErrorBadRequest(textBadRequest));
         return;
       }
       next(err);
@@ -58,16 +61,16 @@ const deleteMovie = (req, res, next) => {
   Movie.findById(req.params._id)
     .then((movie) => {
       if (!movie) {
-        throw new ErrorNotFound('Запрашиваемая карта не найдена');
+        throw new ErrorNotFound(textNotFoundId);
       }
       if (movie.owner.toString() !== req.user._id) {
-        throw new ErrorForbidden('Недостаточно прав для удаления карты');
+        throw new ErrorForbidden(textForbidden);
       }
       return movie.deleteOne().then(() => res.send(movie));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new ErrorBadRequest('Некорректное значение id карты'));
+        next(new ErrorBadRequest(textErrorId));
         return;
       }
       next(err);

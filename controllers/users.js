@@ -6,6 +6,9 @@ const ErrorBadRequest = require('../utils/errors/ErrorBadRequest');
 const ErrorNotFound = require('../utils/errors/ErrorNotFound');
 const ErrorConflict = require('../utils/errors/ErrorConflict');
 const ErrorUnauthorized = require('../utils/errors/ErrorUnauthorized');
+const {
+  textErrorId, textUnauthorized, textNotFoundId, textBadRequest, textConflict,
+} = require('../utils/errors/textErrors');
 const { NODE_ENV, JWT_SECRET } = require('../utils/constants');
 
 const login = (req, res, next) => {
@@ -15,11 +18,11 @@ const login = (req, res, next) => {
     .select('+password')
     .then((user) => {
       if (!user) {
-        throw new ErrorUnauthorized('Неправильные email или пароль');
+        throw new ErrorUnauthorized(textUnauthorized);
       }
       return bcrypt.compare(password, user.password).then((matched) => {
         if (!matched) {
-          throw new ErrorUnauthorized('Неправильные email или пароль');
+          throw new ErrorUnauthorized(textUnauthorized);
         }
         const token = jwt.sign(
           { _id: user._id },
@@ -28,7 +31,7 @@ const login = (req, res, next) => {
             expiresIn: '7d',
           },
         ); // создадим токен
-        return res.status(200).send({ token }); // вернём токен
+        return res.status(200).send({ token });
       });
     })
     .catch((err) => next(err));
@@ -40,13 +43,13 @@ const getInfoUser = (req, res, next) => {
   User.findById(_id)
     .then((user) => {
       if (!user) {
-        throw new ErrorNotFound('Запрашиваемый пользователь не найден');
+        throw new ErrorNotFound(textNotFoundId);
       }
       return res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new ErrorBadRequest('Некорректное значение id пользователя'));
+        next(new ErrorBadRequest(textErrorId));
         return;
       }
       next(err);
@@ -79,11 +82,11 @@ const createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.code === 11000) {
-        next(new ErrorConflict('Данный email уже существует в базе'));
+        next(new ErrorConflict(textConflict));
         return;
       }
       if (err.name === 'ValidationError') {
-        next(new ErrorBadRequest('Некорректно заполнены поля ввода'));
+        next(new ErrorBadRequest(textBadRequest));
         return;
       }
       next(err);
@@ -102,13 +105,13 @@ const updateProfile = (req, res, next) => {
   )
     .then((updateUser) => {
       if (!updateUser) {
-        throw new ErrorNotFound('Запрашиваемый пользователь не найден');
+        throw new ErrorNotFound(textNotFoundId);
       }
       return res.send(updateUser);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ErrorBadRequest('Некорректно заполнены поля ввода'));
+        next(new ErrorBadRequest(textBadRequest));
         return;
       }
       next(err);
