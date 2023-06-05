@@ -7,13 +7,15 @@ const helmet = require('helmet');
 const router = require('./routes');
 const handlerError = require('./middlewares/handlerError');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const { PORT, urlDB } = require('./utils/constants');
+const {
+  PORT, urlMongodb, NODE_ENV, URL_MONGODB_PRODUCTION,
+} = require('./utils/constants');
 const limiter = require('./middlewares/expressRateLimit');
 const cors = require('./middlewares/cors');
 
 const app = express();
 
-mongoose.connect(urlDB);
+mongoose.connect(NODE_ENV === 'production' ? URL_MONGODB_PRODUCTION : urlMongodb);
 
 app.use(helmet());
 app.use(bodyParser.json()); // для собирания JSON-формата
