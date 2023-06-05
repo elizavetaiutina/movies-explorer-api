@@ -118,17 +118,9 @@ const updateProfile = (req, res, next) => {
     });
 };
 
-// ВОЗВРАЩАЕТ ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
-const getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => res.send(users))
-    .catch((err) => next(err));
-};
-
 module.exports = {
   login,
   getInfoUser,
   createUser,
   updateProfile,
-  getUsers,
 };
